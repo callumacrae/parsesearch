@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises';
 
 import { program, Option } from 'commander';
 import chalk from 'chalk';
-import { glob } from 'glob';
+import { globby } from 'globby';
 import { emphasize } from 'emphasize/lib/all.js';
 
 import VueParser from './parsers/vue-sfc.js';
@@ -18,7 +18,7 @@ program
       .default('vue-sfc')
   )
   .option('-m, --match <match...>', 'The matches to search for')
-  .option('-f, --files [files...]', 'The files to search');
+  .option('-f, --file [file...]', 'The file(s) to search');
 
 program.parse();
 
@@ -26,7 +26,10 @@ const options = program.opts();
 const Parser = options.parser === 'vue-sfc' ? VueParser : null;
 const parser = new Parser();
 
-const files = options.files || await glob(Parser.defaultGlob);
+const files = await globby(options.file || Parser.defaultGlob, {
+  gitignore: true,
+  expandDirectories: { files: [Parser.defaultGlob] },
+});
 
 for (const file of files) {
   const content = await readFile(file, 'utf8');

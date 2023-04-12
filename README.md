@@ -15,7 +15,7 @@ Utility to search for code in a project using a parser, not regex
 Options:
   -p, --parser <parser>   The parser to use (choices: "vue-sfc", default: "vue-sfc")
   -m, --match <match...>  The matches to search for
-  -f, --files [files...]  The files to search
+  -f, --file [file...]    The file(s) to search
   -h, --help              display help for command
 ```
 
