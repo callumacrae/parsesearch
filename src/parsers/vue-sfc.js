@@ -77,6 +77,26 @@ function shittyAttributeParser(attr) {
       if (value) {
         shittyAst.value = { type: NodeTypes.TEXT, content: value };
       }
+
+      const bindMatcher = shittyAttributeParser(`v-bind:${attr}`);
+
+      return {
+        test(node) {
+          const boundMatch = bindMatcher.test(node);
+          if (boundMatch[0]) {
+            return boundMatch;
+          }
+
+          // TODO: doesn't work on HTML attributes
+          for (const prop of node.props) {
+            if (objIsMatch(prop, shittyAst)) {
+              return [prop.loc];
+            }
+          }
+
+          return [false];
+        },
+      };
     }
   }
 

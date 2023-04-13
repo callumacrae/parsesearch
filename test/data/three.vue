@@ -1,6 +1,7 @@
 <template>
   <SomeComponent
     v-model="hello"
+    :class="someClass"
     @input="onInput"
   >
     <p>some stuff</p>
