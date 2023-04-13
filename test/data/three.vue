@@ -1,7 +1,7 @@
 <template>
   <SomeComponent
     v-model="hello"
-    :class="someClass"
+    v-bind:class="someClass"
     @input="onInput"
   >
     <p>some stuff</p>
