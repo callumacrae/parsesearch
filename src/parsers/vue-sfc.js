@@ -3,6 +3,7 @@ import { compileTemplate } from '@vue/compiler-sfc';
 // https://github.com/vuejs/core/blob/ae5a9323b7eaf3dfa11b2a442a02faa992f88225/packages/compiler-core/src/ast.ts#L28
 const NodeTypes = {
   ELEMENT: 1,
+  TEXT: 2,
   SIMPLE_EXPRESSION: 4,
   ATTRIBUTE: 6,
   DIRECTIVE: 7,
@@ -66,21 +67,34 @@ function shittyAttributeParser(attr) {
     if (arg) {
       shittyAst.arg = { type: NodeTypes.SIMPLE_EXPRESSION, content: arg };
     }
-
-    return {
-      test(node) {
-        for (const prop of node.props) {
-          if (objIsMatch(prop, shittyAst)) {
-            return [prop.loc];
-          }
-        }
-
-        return [false];
-      },
-    };
+  } else {
+    // TODO: normalise attribute names
+    const attributeMatch = /^([a-z-]+)(?:\s*=\s*(?:"([^"]+)"|'([^']+)'))?$/i.exec(attr);
+    if (attributeMatch) {
+      shittyAst.type = NodeTypes.ATTRIBUTE;
+      shittyAst.name = attributeMatch[1];
+      const value = attributeMatch[2] || attributeMatch[3];
+      if (value) {
+        shittyAst.value = { type: NodeTypes.TEXT, content: value };
+      }
+    }
   }
 
-  throw new Error('Unable to parse attribute');
+  if (!shittyAst.type) {
+    throw new Error('Unable to parse attribute');
+  }
+
+  return {
+    test(node) {
+      for (const prop of node.props) {
+        if (objIsMatch(prop, shittyAst)) {
+          return [prop.loc];
+        }
+      }
+
+      return [false];
+    },
+  };
 }
 
 export default class VueParser {
