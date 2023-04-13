@@ -51,28 +51,37 @@ export default class VueParser {
 
   parse(code, context) {
     const { ast } = compileTemplate({ source: code, id: 'idk' });
-    return this.visitNode(ast, context);
+    const parsedMatches = context.matches.map(match => shittyAttributeParser(match));
+    return this.visitNode(ast, context, parsedMatches);
   }
 
-  visitNode(node, context) {
+  visitNode(node, context, parsedMatches) {
     const matches = [];
 
     if (node.type === NodeTypes.ELEMENT) {
-      const allMatching = context.matches.every((matcher) => {
-        const shittyAst = shittyAttributeParser(matcher);
-        return node.props.some(prop => objIsMatch(prop, shittyAst));
+      const matchingLocs = parsedMatches.map((shittyAst) => {
+        for (const prop of node.props) {
+          if (objIsMatch(prop, shittyAst)) {
+            return prop.loc;
+          }
+        }
+
+        return false;
       });
+      const allMatching = matchingLocs.every(loc => loc);
 
       if (allMatching) {
         const startLine = node.loc.start.line;
-        const endLine = node.children?.length ? node.children[0].loc.start.line - 1 : node.loc.end.line;
-        matches.push({ startLine, endLine });
+        const endLine = node.children?.length
+          ? node.children[0].loc.start.line - 1
+          : node.loc.end.line;
+        matches.push({ startLine, endLine, matchingLocs });
       }
     }
 
     if (node.children) {
       for (const child of node.children) {
-        const childMatches = this.visitNode(child, context);
+        const childMatches = this.visitNode(child, context, parsedMatches);
         matches.push(...childMatches);
       }
     }
