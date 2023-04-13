@@ -23,13 +23,6 @@ function objIsMatch(object, source) {
 // TODO: can this use vue's parseAttribute?
 // https://github.com/vuejs/core/blob/ae5a9323b7eaf3dfa11b2a442a02faa992f88225/packages/compiler-core/src/parse.ts#L755
 function shittyAttributeParser(attr) {
-  if (attr.startsWith('@')) {
-    return shittyAttributeParser(`v-on:${attr.slice(1)}`);
-  }
-  if (attr.startsWith(':')) {
-    return shittyAttributeParser(`v-bind:${attr.slice(1)}`);
-  }
-
   if (attr.includes(" ")) {
     const splitAttrs = attr.split(" ");
     const matchers = splitAttrs.map(splitAttr => shittyAttributeParser(splitAttr));
@@ -40,6 +33,26 @@ function shittyAttributeParser(attr) {
           locs.push(...matcher.test(node));
         }
         return locs;
+      },
+    };
+  }
+
+  if (attr.startsWith('@')) {
+    return shittyAttributeParser(`v-on:${attr.slice(1)}`);
+  }
+  if (attr.startsWith(':')) {
+    return shittyAttributeParser(`v-bind:${attr.slice(1)}`);
+  }
+
+  if (attr.startsWith('<')) {
+    const normalise = (str) => str.replace(/(?:^|-)([a-z])/g, (_, char) => char.toUpperCase());
+    const componentName = normalise(attr.slice(1));
+    return {
+      test(node) {
+        if (node.type === NodeTypes.ELEMENT && normalise(node.tag) === componentName) {
+          return [node.loc];
+        }
+        return [false];
       },
     };
   }

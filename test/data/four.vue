@@ -9,6 +9,6 @@
     <p>waste</p>
     <p>waste</p>
     <p>waste</p>
-    <SomeComponent @input="sure" v-model="test" />
+    <some-component @input="sure" v-model="test" />
   </div>
 </template>

@@ -85,11 +85,11 @@ for (const file of files) {
               }
             }
           }
-
-          process.stdout.write('\n');
         } else {
-          process.stdout.write(lineContent + '\n');
+          process.stdout.write(lineContent);
         }
+
+        process.stdout.write(styles.reset.open + '\n')
       }
     }
   }
