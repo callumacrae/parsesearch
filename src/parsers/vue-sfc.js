@@ -138,7 +138,7 @@ export default class VueParser {
         const endLine = node.children?.length
           ? node.children[0].loc.start.line - 1
           : node.loc.end.line;
-        matches.push({ startLine, endLine, matchingLocs });
+        matches.push({ startLine, endLine, loc: node.loc, matchingLocs });
       }
     }
 

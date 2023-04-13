@@ -7,6 +7,8 @@ import { globby } from 'globby';
 
 import VueParser from './parsers/vue-sfc.js';
 import formatPretty from './formatters/pretty.js';
+import formatJson from './formatters/json.js';
+import formatQuickfix from './formatters/quickfix.js';
 
 program
   .name('parsesearch')
@@ -18,7 +20,7 @@ program
   )
   .addOption(
     new Option('-f, --format <formatter>', 'The formatter to output with')
-      .choices(['pretty'])
+      .choices(['pretty', 'json', 'quickfix'])
       .default('pretty')
   )
   .argument('<match>', 'The match to search for')
@@ -48,6 +50,10 @@ for (const file of files) {
 
 if (options.format === 'pretty') {
   formatPretty(output);
+} else if (options.format === 'json') {
+  formatJson(output);
+} else if (options.format === 'quickfix') {
+  formatQuickfix(output);
 } else {
   throw new Error('Unknown formatter');
 }
