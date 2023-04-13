@@ -18,23 +18,25 @@ program
       .choices(['vue-sfc'])
       .default('vue-sfc')
   )
-  .option('-m, --match <match...>', 'The matches to search for')
-  .option('-f, --file [file...]', 'The file(s) to search');
+  .argument('<match>', 'The match to search for')
+  .argument('[file...]', 'The file(s) to search');
 
 program.parse();
+
+const [matcher, ...fileArgs] = program.args;
 
 const options = program.opts();
 const Parser = options.parser === 'vue-sfc' ? VueParser : null;
 const parser = new Parser();
 
-const files = await globby(options.file || Parser.defaultGlob, {
+const files = await globby(fileArgs.length ? fileArgs : Parser.defaultGlob, {
   gitignore: true,
   expandDirectories: { files: [Parser.defaultGlob] },
 });
 
 for (const file of files) {
   const content = await readFile(file, 'utf8');
-  const matches = parser.parse(content, { path: file, matches: options.match });
+  const matches = parser.parse(content, { path: file, matcher });
 
   if (matches.length) {
     const biggestLineNumber = matches.reduce((acc, match) => Math.max(acc, match.endLine), 0);

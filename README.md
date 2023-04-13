@@ -8,21 +8,23 @@ suited for—e.g., a Vue component that uses both `v-model` and `v-on:input`.
 ## Usage
 
 ```
-Usage: parsesearch [options]
+Usage: parsesearch [options] <match> [file...]
 
 Utility to search for code in a project using a parser, not regex
 
+Arguments:
+  match                  The match to search for
+  file                   The file(s) to search
+
 Options:
-  -p, --parser <parser>   The parser to use (choices: "vue-sfc", default: "vue-sfc")
-  -m, --match <match...>  The matches to search for
-  -f, --file [file...]    The file(s) to search
-  -h, --help              display help for command
+  -p, --parser <parser>  The parser to use (choices: "vue-sfc", default: "vue-sfc")
+  -h, --help             display help for command
 ```
 
 The following finds all Vue components using both `@input` and `v-model`:
 
 ```
-$ npx parsesearch --match "@input" "v-model"
+$ npx parsesearch "@input v-model"
 ```
 
 It does a bit of parsing, so `v-on:input` and `@input` are considered to be the

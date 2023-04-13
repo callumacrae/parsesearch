@@ -30,17 +30,41 @@ function shittyAttributeParser(attr) {
     return shittyAttributeParser(`v-bind:${attr.slice(1)}`);
   }
 
-  const prop = {};
+  if (attr.includes(" ")) {
+    const splitAttrs = attr.split(" ");
+    const matchers = splitAttrs.map(splitAttr => shittyAttributeParser(splitAttr));
+    return {
+      test(node) {
+        const locs = [];
+        for (const matcher of matchers) {
+          locs.push(...matcher.test(node));
+        }
+        return locs;
+      },
+    };
+  }
+
+  const shittyAst = {};
 
   if (attr.startsWith('v-')) {
-    prop.type = NodeTypes.DIRECTIVE;
+    shittyAst.type = NodeTypes.DIRECTIVE;
     const [name, arg] = attr.slice(2).split(':');
-    prop.name = name;
+    shittyAst.name = name;
     if (arg) {
-      prop.arg = { type: NodeTypes.SIMPLE_EXPRESSION, content: arg };
+      shittyAst.arg = { type: NodeTypes.SIMPLE_EXPRESSION, content: arg };
     }
 
-    return prop;
+    return {
+      test(node) {
+        for (const prop of node.props) {
+          if (objIsMatch(prop, shittyAst)) {
+            return [prop.loc];
+          }
+        }
+
+        return [false];
+      },
+    };
   }
 
   throw new Error('Unable to parse attribute');
@@ -51,23 +75,15 @@ export default class VueParser {
 
   parse(code, context) {
     const { ast } = compileTemplate({ source: code, id: 'idk' });
-    const parsedMatches = context.matches.map(match => shittyAttributeParser(match));
-    return this.visitNode(ast, context, parsedMatches);
+    const matcher = shittyAttributeParser(context.matcher);
+    return this.visitNode(ast, context, matcher);
   }
 
-  visitNode(node, context, parsedMatches) {
+  visitNode(node, context, matcher) {
     const matches = [];
 
     if (node.type === NodeTypes.ELEMENT) {
-      const matchingLocs = parsedMatches.map((shittyAst) => {
-        for (const prop of node.props) {
-          if (objIsMatch(prop, shittyAst)) {
-            return prop.loc;
-          }
-        }
-
-        return false;
-      });
+      const matchingLocs = matcher.test(node);
       const allMatching = matchingLocs.every(loc => loc);
 
       if (allMatching) {
@@ -81,7 +97,7 @@ export default class VueParser {
 
     if (node.children) {
       for (const child of node.children) {
-        const childMatches = this.visitNode(child, context, parsedMatches);
+        const childMatches = this.visitNode(child, context, matcher);
         matches.push(...childMatches);
       }
     }
