@@ -47,6 +47,11 @@ const files = await globby(fileArgs.length ? fileArgs : Parser.defaultGlob, {
   expandDirectories: { files: [Parser.defaultGlob] },
 });
 
+if (!files.length) {
+  console.error('No files found');
+  process.exit(1);
+}
+
 const output = [];
 
 for (const file of files) {
@@ -63,6 +68,7 @@ if (options.format === 'pretty') {
 } else if (options.format === 'quickfix') {
   formatQuickfix(output, options);
 } else {
-  throw new Error('Unknown formatter');
+  console.error('Unknown formatter');
+  process.exit(1);
 }
 

@@ -138,10 +138,19 @@ export default class VueParser {
       }
     }
 
+    // TODO: Can we use vue's traverseNode here?
+    // https://github.com/vuejs/core/blob/1c06fe1d021572fcdcf187794ce8313a7593ac21/packages/compiler-core/src/transform.ts#L409
     if (node.children) {
       for (const child of node.children) {
         const childMatches = this.visitNode(child, context, matcher);
         matches.push(...childMatches);
+      }
+    }
+
+    if (node.branches) {
+      for (const branch of node.branches) {
+        const branchMatches = this.visitNode(branch, context, matcher);
+        matches.push(...branchMatches);
       }
     }
 
