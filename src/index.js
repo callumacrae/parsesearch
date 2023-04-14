@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 
+import path from 'path';
 import { readFile } from 'fs/promises';
 
 import { program, Option } from 'commander';
@@ -36,8 +37,13 @@ const options = program.opts();
 const Parser = options.parser === 'vue-sfc' ? VueParser : null;
 const parser = new Parser();
 
+const cwd = process.cwd();
+const filesAllInCwd = fileArgs.every((file) =>
+  (!path.isAbsolute(file) || file.startsWith(cwd)) && !file.startsWith('../')
+);
 const files = await globby(fileArgs.length ? fileArgs : Parser.defaultGlob, {
-  gitignore: true,
+  cwd,
+  gitignore: filesAllInCwd,
   expandDirectories: { files: [Parser.defaultGlob] },
 });
 

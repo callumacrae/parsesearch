@@ -83,18 +83,14 @@ function shittyAttributeParser(attr) {
       return {
         test(node) {
           const boundMatch = bindMatcher.test(node);
-          if (boundMatch[0]) {
-            return boundMatch;
-          }
 
-          // TODO: doesn't work on HTML attributes
           for (const prop of node.props) {
             if (objIsMatch(prop, shittyAst)) {
-              return [prop.loc];
+              return [...boundMatch.filter(m => m), prop.loc];
             }
           }
 
-          return [false];
+          return boundMatch;
         },
       };
     }
