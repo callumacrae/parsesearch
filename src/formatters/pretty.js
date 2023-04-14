@@ -1,5 +1,6 @@
 import styles from 'ansi-styles';
 import chalk from 'chalk';
+import supportsColor from 'supports-color';
 import { emphasize } from 'emphasize/lib/all.js';
 
 export default function formatPretty(output) {
@@ -12,7 +13,9 @@ export default function formatPretty(output) {
 
     process.stdout.write('\n' + chalk.green.bold(file) + '\n');
 
-    const highlightedFile = emphasize.highlight('html', content).value;
+    const highlightedFile = supportsColor.stdout
+      ? emphasize.highlight('html', content).value
+      : content;
     const splitFile = highlightedFile.split('\n');
 
     for (const match of matches) {
@@ -25,7 +28,7 @@ export default function formatPretty(output) {
 
         // TODO: support multi-line matches
         const matchingLocs = match.matchingLocs.filter(loc => loc.start.line === line);
-        if (matchingLocs.length) {
+        if (supportsColor.stdout && matchingLocs.length) {
           let printableCol = -1;
           let isInAnsiChar = false;
           let isInMatchingLoc = false;

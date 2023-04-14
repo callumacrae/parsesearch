@@ -21,8 +21,10 @@ program
   .addOption(
     new Option('-f, --format <formatter>', 'The formatter to output with')
       .choices(['pretty', 'json', 'quickfix'])
-      .default('pretty')
+      .default(process.env.VIMRUNTIME ? 'quickfix' : 'pretty')
   )
+  .option('--color', 'Force color output', false)
+  .option('--no-color', 'Force no color output')
   .argument('<match>', 'The match to search for')
   .argument('[file...]', 'The file(s) to search');
 
@@ -49,11 +51,11 @@ for (const file of files) {
 }
 
 if (options.format === 'pretty') {
-  formatPretty(output);
+  formatPretty(output, options);
 } else if (options.format === 'json') {
-  formatJson(output);
+  formatJson(output, options);
 } else if (options.format === 'quickfix') {
-  formatQuickfix(output);
+  formatQuickfix(output, options);
 } else {
   throw new Error('Unknown formatter');
 }
