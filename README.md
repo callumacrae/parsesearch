@@ -13,12 +13,16 @@ Usage: parsesearch [options] <match> [file...]
 Utility to search for code in a project using a parser, not regex
 
 Arguments:
-  match                  The match to search for
-  file                   The file(s) to search
+  match                     The match to search for
+  file                      The file(s) to search
 
 Options:
-  -p, --parser <parser>  The parser to use (choices: "vue-sfc", default: "vue-sfc")
-  -h, --help             display help for command
+  -p, --parser <parser>     The parser to use (choices: "vue-sfc", default: "vue-sfc")
+  -f, --format <formatter>  The formatter to output with (choices: "pretty", "json",
+                            "quickfix", default: "pretty")
+  --color                   Force color output
+  --no-color                Force no color output
+  -h, --help                display help for command
 ```
 
 The following finds all Vue components using both `@input` and `v-model`:

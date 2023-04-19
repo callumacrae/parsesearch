@@ -1,14 +1,13 @@
-export default function formatJson(output) {
-  const jsonOutput = [];
-
-  for (const { file, matches } of output) {
-    if (!matches.length) continue;
-
-    jsonOutput.push({
-      file,
-      matches,
-    });
+export default class JsonFormatter {
+  constructor() {
+    this.output = [];
   }
 
-  process.stdout.write(JSON.stringify(jsonOutput, null, 2) + '\n');
+  result({ file, matches }) {
+    this.output.push({ file, matches });
+  }
+
+  finish() {
+    process.stdout.write(JSON.stringify(this.output, null, 2) + '\n');
+  }
 }

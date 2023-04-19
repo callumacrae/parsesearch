@@ -7,9 +7,9 @@ import { program, Option } from 'commander';
 import { globby } from 'globby';
 
 import VueParser from './parsers/vue-sfc.js';
-import formatPretty from './formatters/pretty.js';
-import formatJson from './formatters/json.js';
-import formatQuickfix from './formatters/quickfix.js';
+import PrettyFormatter from './formatters/pretty.js';
+import JsonFormatter from './formatters/json.js';
+import QuickfixFormatter from './formatters/quickfix.js';
 
 program
   .name('parsesearch')
@@ -24,7 +24,7 @@ program
       .choices(['pretty', 'json', 'quickfix'])
       .default(process.env.VIMRUNTIME ? 'quickfix' : 'pretty')
   )
-  .option('--color', 'Force color output', false)
+  .option('--color', 'Force color output')
   .option('--no-color', 'Force no color output')
   .argument('<match>', 'The match to search for')
   .argument('[file...]', 'The file(s) to search');
@@ -52,23 +52,27 @@ if (!files.length) {
   process.exit(1);
 }
 
-const output = [];
-
-for (const file of files) {
-  const content = await readFile(file, 'utf8');
-  const matches = parser.parse(content, { path: file, matcher });
-
-  output.push({ file, content, matches });
-}
-
+let Formatter;
 if (options.format === 'pretty') {
-  formatPretty(output, options);
+  Formatter = PrettyFormatter;
 } else if (options.format === 'json') {
-  formatJson(output, options);
+  Formatter = JsonFormatter;
 } else if (options.format === 'quickfix') {
-  formatQuickfix(output, options);
+  Formatter = QuickfixFormatter;
 } else {
   console.error('Unknown formatter');
   process.exit(1);
 }
 
+const formatter = new Formatter({ options, files });
+
+for (const file of files) {
+  const content = await readFile(file, 'utf8');
+  const matches = parser.parse(content, { path: file, matcher });
+
+  formatter.result({ file, content, matches });
+}
+
+if (formatter.finish) {
+  formatter.finish();
+}

@@ -1,6 +1,6 @@
-export default function formatQuickfix(output) {
-  for (const { file, content, matches } of output) {
-    if (!matches.length) continue;
+export default class QuickfixFormatter {
+  result({ file, content, matches }) {
+    if (!matches.length) return;
 
     const splitContent = content.split('\n');
 

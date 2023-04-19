@@ -3,9 +3,9 @@ import chalk from 'chalk';
 import supportsColor from 'supports-color';
 import { emphasize } from 'emphasize/lib/all.js';
 
-export default function formatPretty(output) {
-  for (const { file, content, matches } of output) {
-    if (!matches.length) continue;
+export default class PrettyFormatter {
+  result({ file, content, matches }) {
+    if (!matches.length) return;
 
     const biggestLineNumber = matches.reduce((acc, match) => Math.max(acc, match.endLine), 0);
     const lineNumberLength = biggestLineNumber.toString().length;
